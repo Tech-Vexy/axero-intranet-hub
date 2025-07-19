@@ -68,7 +68,7 @@ User authentication data is stored in either localStorage (for "Remember Me" opt
 
 ## License
 
-This project is licensed under the MIT License - see the LICENSE file for details.
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
 
 ## Acknowledgments
 
