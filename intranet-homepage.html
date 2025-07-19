@@ -2056,17 +2056,66 @@
                 </div>
               </div>
               
-              <div style="background: var(--secondary); padding: 1.5rem; border-radius: var(--radius); margin-bottom: 1.5rem;">
-                <h3 style="margin-top: 0;">Account Information</h3>
-                <div style="display: grid; grid-template-columns: auto 1fr; gap: 0.5rem 1rem;">
-                  <div style="font-weight: 600;">Username:</div>
-                  <div>${currentUser.username}</div>
-                  <div style="font-weight: 600;">Email:</div>
-                  <div>${currentUser.email}</div>
-                  <div style="font-weight: 600;">Role:</div>
-                  <div>${currentUser.role}</div>
-                  <div style="font-weight: 600;">Last Login:</div>
-                  <div>${new Date().toLocaleString()}</div>
+              <div style="display: flex; gap: 1rem; margin-bottom: 1rem;">
+                <button class="btn-primary" onclick="showProfileTab('info')" id="profile-tab-info">Account Info</button>
+                <button class="btn-secondary" onclick="showProfileTab('devices')" id="profile-tab-devices">Logged In Devices</button>
+              </div>
+              
+              <div id="profile-tab-content-info" style="display: block;">
+                <div style="background: var(--secondary); padding: 1.5rem; border-radius: var(--radius); margin-bottom: 1.5rem;">
+                  <h3 style="margin-top: 0;">Account Information</h3>
+                  <div style="display: grid; grid-template-columns: auto 1fr; gap: 0.5rem 1rem;">
+                    <div style="font-weight: 600;">Username:</div>
+                    <div>${currentUser.username}</div>
+                    <div style="font-weight: 600;">Email:</div>
+                    <div>${currentUser.email}</div>
+                    <div style="font-weight: 600;">Role:</div>
+                    <div>${currentUser.role}</div>
+                    <div style="font-weight: 600;">Last Login:</div>
+                    <div>${new Date().toLocaleString()}</div>
+                  </div>
+                </div>
+              </div>
+              
+              <div id="profile-tab-content-devices" style="display: none;">
+                <div style="background: var(--secondary); padding: 1.5rem; border-radius: var(--radius); margin-bottom: 1.5rem;">
+                  <h3 style="margin-top: 0;">Logged In Devices</h3>
+                  <div style="margin-bottom: 1rem;">
+                    <div style="background: var(--bg); padding: 1rem; border-radius: var(--radius); margin-bottom: 0.5rem; display: flex; justify-content: space-between; align-items: center;">
+                      <div>
+                        <div style="font-weight: 600;">Current Device</div>
+                        <div style="font-size: 0.9rem; opacity: 0.8;">${navigator.userAgent}</div>
+                        <div style="font-size: 0.8rem; color: var(--primary); margin-top: 0.3rem;">Last active: Just now</div>
+                      </div>
+                      <div>
+                        <span style="background: #10b981; color: white; padding: 0.2rem 0.5rem; border-radius: 1rem; font-size: 0.8rem;">Current</span>
+                      </div>
+                    </div>
+                    
+                    <div style="background: var(--bg); padding: 1rem; border-radius: var(--radius); margin-bottom: 0.5rem; display: flex; justify-content: space-between; align-items: center;">
+                      <div>
+                        <div style="font-weight: 600;">Mobile Device</div>
+                        <div style="font-size: 0.9rem; opacity: 0.8;">iPhone - Safari</div>
+                        <div style="font-size: 0.8rem; color: var(--primary); margin-top: 0.3rem;">Last active: 2 hours ago</div>
+                      </div>
+                      <div>
+                        <button class="btn-danger" style="padding: 0.3rem 0.6rem; font-size: 0.8rem;">Logout</button>
+                      </div>
+                    </div>
+                    
+                    <div style="background: var(--bg); padding: 1rem; border-radius: var(--radius); display: flex; justify-content: space-between; align-items: center;">
+                      <div>
+                        <div style="font-weight: 600;">Home Computer</div>
+                        <div style="font-size: 0.9rem; opacity: 0.8;">Windows - Chrome</div>
+                        <div style="font-size: 0.8rem; color: var(--primary); margin-top: 0.3rem;">Last active: Yesterday</div>
+                      </div>
+                      <div>
+                        <button class="btn-danger" style="padding: 0.3rem 0.6rem; font-size: 0.8rem;">Logout</button>
+                      </div>
+                    </div>
+                  </div>
+                  
+                  <button class="btn-danger">Logout from all devices</button>
                 </div>
               </div>
               
@@ -2083,6 +2132,20 @@
       // Show modal
       document.getElementById('user-profile-modal').classList.add('show');
       document.getElementById('user-menu').style.display = 'none';
+    }
+    
+    // Show profile tab
+    function showProfileTab(tab) {
+      // Hide all tabs
+      document.getElementById('profile-tab-content-info').style.display = 'none';
+      document.getElementById('profile-tab-content-devices').style.display = 'none';
+      
+      // Show selected tab
+      document.getElementById(`profile-tab-content-${tab}`).style.display = 'block';
+      
+      // Update tab buttons
+      document.getElementById('profile-tab-info').className = tab === 'info' ? 'btn-primary' : 'btn-secondary';
+      document.getElementById('profile-tab-devices').className = tab === 'devices' ? 'btn-primary' : 'btn-secondary';
     }
     
     // Open user settings
@@ -2630,24 +2693,28 @@
       // Group forecasts by day
       forecastList.forEach(item => {
         const date = new Date(item.dt * 1000);
-        const day = date.toLocaleDateString();
+        // Use ISO date format (YYYY-MM-DD) as key for consistent grouping
+        const dayKey = date.toISOString().split('T')[0];
         
-        if (!dailyForecasts[day]) {
-          dailyForecasts[day] = {
-            date: day,
+        if (!dailyForecasts[dayKey]) {
+          dailyForecasts[dayKey] = {
+            date: date, // Store the actual date object
             temps: [],
             icons: [],
             descriptions: []
           };
         }
         
-        dailyForecasts[day].temps.push(item.main.temp);
-        dailyForecasts[day].icons.push(item.weather[0].icon);
-        dailyForecasts[day].descriptions.push(item.weather[0].description);
+        dailyForecasts[dayKey].temps.push(item.main.temp);
+        dailyForecasts[dayKey].icons.push(item.weather[0].icon);
+        dailyForecasts[dayKey].descriptions.push(item.weather[0].description);
       });
       
+      // Sort by date (chronological order)
+      const sortedForecasts = Object.values(dailyForecasts).sort((a, b) => a.date - b.date);
+      
       // Create forecast cards
-      return Object.values(dailyForecasts).slice(0, 5).map(day => {
+      return sortedForecasts.slice(0, 5).map(day => {
         // Calculate average temp and most common condition
         const avgTemp = day.temps.reduce((sum, temp) => sum + temp, 0) / day.temps.length;
         
@@ -2665,9 +2732,26 @@
         });
         const mostCommonDesc = Object.entries(descCounts).sort((a, b) => b[1] - a[1])[0][0];
         
+        // Format the date properly
+        const today = new Date();
+        today.setHours(0, 0, 0, 0);
+        const forecastDate = new Date(day.date);
+        forecastDate.setHours(0, 0, 0, 0);
+        
+        // Determine if it's today, tomorrow, or show the day name
+        let dayLabel;
+        if (forecastDate.getTime() === today.getTime()) {
+          dayLabel = 'Today';
+        } else if (forecastDate.getTime() === today.getTime() + 86400000) {
+          dayLabel = 'Tomorrow';
+        } else {
+          dayLabel = forecastDate.toLocaleDateString('en-US', { weekday: 'short' });
+        }
+        
         return `
           <div style="flex: 1; min-width: 100px; background: var(--bg); padding: 0.8rem; border-radius: var(--radius); text-align: center;">
-            <div style="font-weight: 600;">${new Date(day.date).toLocaleDateString('en-US', { weekday: 'short' })}</div>
+            <div style="font-weight: 600;">${dayLabel}</div>
+            <div style="font-size: 0.8rem; opacity: 0.7;">${forecastDate.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}</div>
             <div style="font-size: 1.5rem; margin: 0.5rem 0;">${weatherIcons[mostCommonIcon] || '🌤️'}</div>
             <div style="font-weight: 600;">${Math.round(avgTemp)}°C</div>
             <div style="font-size: 0.8rem; opacity: 0.8;">${mostCommonDesc.charAt(0).toUpperCase() + mostCommonDesc.slice(1)}</div>
@@ -6422,9 +6506,25 @@
         weatherInfo = `${icon} ${temp} - ${desc} in ${userLocation.city}`;
       }
       
+      // Count announcements
+      const announcementCount = noticeBoard ? noticeBoard.length : 5;
+      
+      // Count upcoming events
+      let upcomingEventCount = 0;
+      const today = new Date();
+      for (let i = 0; i < 30; i++) {
+        const date = new Date(today.getTime() + i * 24 * 60 * 60 * 1000);
+        const dateStr = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`;
+        const dayEvents = calendarEvents[dateStr] || [];
+        upcomingEventCount += dayEvents.length;
+      }
+      
+      // Count online users
+      const onlineUsers = allUsers ? allUsers.length : 128;
+      
       showNotification(`🎉 Welcome to Axero Intranet, ${currentUser ? currentUser.name : 'User'}!<br><br>
-        📋 5 announcements • 3 upcoming events<br>
-        ${weatherInfo} • 128 users online<br><br>
+        📋 ${announcementCount} announcements • ${upcomingEventCount} upcoming events<br>
+        ${weatherInfo} • ${onlineUsers} users online<br><br>
         💡 Pro tip: Press Ctrl+K to search anything!`, 'success');
     }
     
